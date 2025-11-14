@@ -1,20 +1,18 @@
 import { Router } from "express";
 
-const ownerRouter = Router();
+const petRouter = Router();
 
-ownerRouter.get("/", (req, res) => res.send({ title: "Get all pets" }));
+petRouter.get("/", (req, res) => res.send({ title: "Get all pets" }));
 
-ownerRouter.get("/:id", (req, res) =>
-  res.send({ title: "Get pet by owner id" })
-);
+petRouter.get("/:id", (req, res) => res.send({ title: "Get pet by owner id" }));
 
-ownerRouter.post("/", (req, res) => res.send({ title: "Create pet " }));
+petRouter.post("/", (req, res) => res.send({ title: "Create pet " }));
 
-ownerRouter.put("/:id/update", (req, res) =>
+petRouter.put("/:id/update", (req, res) =>
   res.send({ title: "Update pet information" })
 );
 
-ownerRouter.delete("/:id/delete", (req, res) =>
+petRouter.delete("/:id/delete", (req, res) =>
   res.send({ title: "pet deleted" })
 );
 
