@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester - Sistema Veterinario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .info-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .info-box h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button.danger {
+            background: #e74c3c;
+        }
+
+        button.danger:hover {
+            background: #c0392b;
+        }
+
+        button.secondary {
+            background: #95a5a6;
+        }
+
+        button.secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .response {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .response.success {
+            border-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .response.error {
+            border-color: #e74c3c;
+            background: #fadbd8;
+        }
+
+        .token-display {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status.connected {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .status.disconnected {
+            background: #fadbd8;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐾 Sistema Veterinario - API Tester</h1>
+
+        <div class="info-box">
+            <h2>Estado del Servidor <span id="status" class="status disconnected">Desconectado</span></h2>
+            <p><strong>URL Base:</strong> <code id="baseUrl">http://localhost:3000</code></p>
+            <p><strong>Token JWT:</strong> <span id="tokenStatus">No autenticado</span></p>
+            <div id="tokenDisplay" class="token-display" style="display: none;"></div>
+        </div>
+
+        <div class="grid">
+            <!-- AUTENTICACIÓN -->
+            <div class="section">
+                <h3>🔐 Autenticación</h3>
+
+                <div class="form-group">
+                    <label>Nombre:</label>
+                    <input type="text" id="signupName" placeholder="Juan Pérez">
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="signupEmail" placeholder="juan@ejemplo.com">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña:</label>
+                    <input type="password" id="signupPassword" placeholder="Mínimo 6 caracteres">
+                </div>
+                <button onclick="signUp()">Registrarse</button>
+                <button onclick="signIn()" class="secondary">Iniciar Sesión</button>
+                <button onclick="clearToken()" class="danger">Cerrar Sesión</button>
+
+                <div id="authResponse" class="response" style="display: none;"></div>
+            </div>
+
+            <!-- USUARIOS -->
+            <div class="section">
+                <h3>👥 Usuarios (Veterinarios)</h3>
+
+                <button onclick="getAllUsers()">Ver Todos los Usuarios</button>
+                <button onclick="testProtectedRoute()">Test Ruta Protegida</button>
+
+                <div id="usersResponse" class="response" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- DUEÑOS -->
+        <div class="section">
+            <h3>👤 Dueños de Mascotas</h3>
+
+            <div class="grid">
+                <div>
+                    <div class="form-group">
+                        <label>Nombre:</label>
+                        <input type="text" id="ownerName" placeholder="María">
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido:</label>
+                        <input type="text" id="ownerLastname" placeholder="García">
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" id="ownerEmail" placeholder="maria@ejemplo.com">
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>Fecha de Nacimiento:</label>
+                        <input type="date" id="ownerBirthDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono:</label>
+                        <input type="tel" id="ownerPhone" placeholder="555-1234">
+                    </div>
+                    <div class="form-group">
+                        <label>Género:</label>
+                        <select id="ownerGender">
+                            <option value="Hombre">Hombre</option>
+                            <option value="Mujer">Mujer</option>
+                            <option value="Prefiero no responder">Prefiero no responder</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="createOwner()">Crear Dueño</button>
+            <button onclick="getAllOwners()" class="secondary">Ver Todos</button>
+
+            <div id="ownersResponse" class="response" style="display: none;"></div>
+        </div>
+
+        <!-- MASCOTAS -->
+        <div class="section">
+            <h3>🐕 Mascotas</h3>
+
+            <div class="grid">
+                <div>
+                    <div class="form-group">
+                        <label>ID del Dueño:</label>
+                        <input type="text" id="petOwnerId" placeholder="Obtener de la lista de dueños">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre de la Mascota:</label>
+                        <input type="text" id="petName" placeholder="Max">
+                    </div>
+                    <div class="form-group">
+                        <label>Número de Chip:</label>
+                        <input type="text" id="petChipNumber" placeholder="123456789">
+                    </div>
+                    <div class="form-group">
+                        <label>Especie:</label>
+                        <select id="petSpecies">
+                            <option value="Perro">Perro</option>
+                            <option value="Gato">Gato</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>Raza:</label>
+                        <input type="text" id="petBreed" placeholder="Labrador">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Nacimiento:</label>
+                        <input type="date" id="petBirthDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Género:</label>
+                        <select id="petGender">
+                            <option value="Macho">Macho</option>
+                            <option value="Hembra">Hembra</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Color:</label>
+                        <input type="text" id="petColor" placeholder="Negro">
+                    </div>
+                    <div class="form-group">
+                        <label>Peso (kg):</label>
+                        <input type="number" id="petWeight" placeholder="25.5" step="0.1">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="createPet()">Crear Mascota</button>
+            <button onclick="getAllPets()" class="secondary">Ver Todas</button>
+
+            <div id="petsResponse" class="response" style="display: none;"></div>
+        </div>
+
+        <!-- CITAS -->
+        <div class="section">
+            <h3>📅 Citas</h3>
+
+            <div class="grid">
+                <div>
+                    <div class="form-group">
+                        <label>ID de la Mascota:</label>
+                        <input type="text" id="appointmentPetId" placeholder="Obtener de la lista de mascotas">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha y Hora:</label>
+                        <input type="datetime-local" id="appointmentDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Motivo:</label>
+                        <select id="appointmentReason">
+                            <option value="Estetica">Estética</option>
+                            <option value="Consulta veterinaria">Consulta veterinaria</option>
+                            <option value="Cirugia">Cirugía</option>
+                            <option value="Vacunacion">Vacunación</option>
+                            <option value="Urgencia">Urgencia</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>Estado:</label>
+                        <select id="appointmentStatus">
+                            <option value="Programada">Programada</option>
+                            <option value="Confirmada">Confirmada</option>
+                            <option value="Cancelada">Cancelada</option>
+                            <option value="Completada">Completada</option>
+                            <option value="No Asistió">No Asistió</option>
+                            <option value="Re-agendada">Re-agendada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Notas del Veterinario:</label>
+                        <textarea id="appointmentNotes" rows="3" placeholder="Observaciones..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="createAppointment()">Crear Cita</button>
+            <button onclick="getUnassignedAppointments()" class="secondary">Ver Sin Asignar</button>
+
+            <div id="appointmentsResponse" class="response" style="display: none;"></div>
+        </div>
+
+        <!-- BÚSQUEDA -->
+        <div class="section">
+            <h3>🔍 Búsqueda</h3>
+
+            <div class="grid">
+                <div class="form-group">
+                    <label>Campo de búsqueda:</label>
+                    <input type="text" id="searchFilter" placeholder="Ej: name, email, species">
+                </div>
+                <div class="form-group">
+                    <label>Valor a buscar:</label>
+                    <input type="text" id="searchValue" placeholder="Texto a buscar">
+                </div>
+            </div>
+
+            <button onclick="search()">Buscar</button>
+
+            <div id="searchResponse" class="response" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/v1';
+        let authToken = localStorage.getItem('authToken') || '';
+
+        // Check server status on load
+        window.onload = async () => {
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    document.getElementById('status').textContent = 'Conectado';
+                    document.getElementById('status').className = 'status connected';
+                }
+            } catch (error) {
+                console.error('Server not reachable');
+            }
+
+            if (authToken) {
+                updateTokenDisplay();
+            }
+        };
+
+        function updateTokenDisplay() {
+            if (authToken) {
+                document.getElementById('tokenStatus').textContent = 'Autenticado ✓';
+                document.getElementById('tokenDisplay').textContent = authToken;
+                document.getElementById('tokenDisplay').style.display = 'block';
+            } else {
+                document.getElementById('tokenStatus').textContent = 'No autenticado';
+                document.getElementById('tokenDisplay').style.display = 'none';
+            }
+        }
+
+        function clearToken() {
+            authToken = '';
+            localStorage.removeItem('authToken');
+            updateTokenDisplay();
+            showResponse('authResponse', { message: 'Sesión cerrada' }, false);
+        }
+
+        async function apiRequest(endpoint, method = 'GET', body = null, requiresAuth = false) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+
+            if (requiresAuth && authToken) {
+                options.headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, options);
+                const data = await response.json();
+                return { data, ok: response.ok };
+            } catch (error) {
+                return { data: { error: error.message }, ok: false };
+            }
+        }
+
+        function showResponse(elementId, data, success) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.className = 'response ' + (success ? 'success' : 'error');
+            element.style.display = 'block';
+        }
+
+        // AUTH
+        async function signUp() {
+            const body = {
+                name: document.getElementById('signupName').value,
+                email: document.getElementById('signupEmail').value,
+                password: document.getElementById('signupPassword').value
+            };
+
+            const { data, ok } = await apiRequest('/auth/sign-up', 'POST', body);
+            showResponse('authResponse', data, ok);
+
+            if (ok && data.token) {
+                authToken = data.token;
+                localStorage.setItem('authToken', authToken);
+                updateTokenDisplay();
+            }
+        }
+
+        async function signIn() {
+            const body = {
+                email: document.getElementById('signupEmail').value,
+                password: document.getElementById('signupPassword').value
+            };
+
+            const { data, ok } = await apiRequest('/auth/sign-in', 'POST', body);
+            showResponse('authResponse', data, ok);
+
+            if (ok && data.token) {
+                authToken = data.token;
+                localStorage.setItem('authToken', authToken);
+                updateTokenDisplay();
+            }
+        }
+
+        // USERS
+        async function getAllUsers() {
+            const { data, ok } = await apiRequest('/users', 'GET');
+            showResponse('usersResponse', data, ok);
+        }
+
+        async function testProtectedRoute() {
+            const { data, ok } = await apiRequest('/users/test', 'GET', null, true);
+            showResponse('usersResponse', data, ok);
+        }
+
+        // OWNERS
+        async function createOwner() {
+            const body = {
+                name: document.getElementById('ownerName').value,
+                lastname: document.getElementById('ownerLastname').value,
+                email: document.getElementById('ownerEmail').value,
+                birthDate: document.getElementById('ownerBirthDate').value,
+                phone: document.getElementById('ownerPhone').value,
+                gender: document.getElementById('ownerGender').value
+            };
+
+            const { data, ok } = await apiRequest('/owner', 'POST', body, true);
+            showResponse('ownersResponse', data, ok);
+        }
+
+        async function getAllOwners() {
+            const { data, ok } = await apiRequest('/owner', 'GET');
+            showResponse('ownersResponse', data, ok);
+        }
+
+        // PETS
+        async function createPet() {
+            const body = {
+                owner: document.getElementById('petOwnerId').value,
+                petName: document.getElementById('petName').value,
+                chipNumber: document.getElementById('petChipNumber').value,
+                species: document.getElementById('petSpecies').value,
+                breed: document.getElementById('petBreed').value,
+                birthDate: document.getElementById('petBirthDate').value,
+                gender: document.getElementById('petGender').value,
+                color: document.getElementById('petColor').value,
+                weight: parseFloat(document.getElementById('petWeight').value)
+            };
+
+            const { data, ok } = await apiRequest('/pets', 'POST', body, true);
+            showResponse('petsResponse', data, ok);
+        }
+
+        async function getAllPets() {
+            const { data, ok } = await apiRequest('/pets', 'GET');
+            showResponse('petsResponse', data, ok);
+        }
+
+        // APPOINTMENTS
+        async function createAppointment() {
+            const body = {
+                pet: document.getElementById('appointmentPetId').value,
+                date: document.getElementById('appointmentDate').value,
+                reason: document.getElementById('appointmentReason').value,
+                status: document.getElementById('appointmentStatus').value,
+                veterinarianNotes: document.getElementById('appointmentNotes').value
+            };
+
+            const { data, ok } = await apiRequest('/appointments', 'POST', body, true);
+            showResponse('appointmentsResponse', data, ok);
+        }
+
+        async function getUnassignedAppointments() {
+            const { data, ok } = await apiRequest('/appointments', 'GET', null, true);
+            showResponse('appointmentsResponse', data, ok);
+        }
+
+        // SEARCH
+        async function search() {
+            const filter = document.getElementById('searchFilter').value;
+            const value = document.getElementById('searchValue').value;
+
+            const { data, ok } = await apiRequest(`/search?filter=${filter}&value=${value}`, 'GET');
+            showResponse('searchResponse', data, ok);
+        }
+    </script>
+</body>
+</html>

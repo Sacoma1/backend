@@ -24,3 +24,5 @@ searchRouter.get("/", (req, res) => {
   });
   return res.json(results);
 });
+
+export default searchRouter;
