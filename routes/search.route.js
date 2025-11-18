@@ -1,7 +1,6 @@
 import { Router } from "express";
 import dummyData from "../data.js";
 
-
 const searchRouter = Router();
 
 searchRouter.get("/", (req, res) => {
@@ -24,3 +23,5 @@ searchRouter.get("/", (req, res) => {
   });
   return res.json(results);
 });
+
+export default searchRouter;
